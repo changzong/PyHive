@@ -255,23 +255,23 @@ class Cursor(common.DBAPICursor):
             self._data = []
             self._state = self._STATE_FINISHED
             #raise ProgrammingError("No result set")
-
-        req = ttypes.TFetchResultsReq(
-            operationHandle=self._operationHandle,
-            orientation=ttypes.TFetchOrientation.FETCH_NEXT,
-            maxRows=self.arraysize,
-        )
-        response = self._connection.client.FetchResults(req)
-        _check_status(response)
-        assert not response.results.rows, 'expected data in columnar format'
-        columns = map(_unwrap_column, response.results.columns)
-        new_data = zip(*columns)
-        self._data += new_data
+        else:
+            req = ttypes.TFetchResultsReq(
+                operationHandle=self._operationHandle,
+                orientation=ttypes.TFetchOrientation.FETCH_NEXT,
+                maxRows=self.arraysize,
+            )
+            response = self._connection.client.FetchResults(req)
+            _check_status(response)
+            assert not response.results.rows, 'expected data in columnar format'
+            columns = map(_unwrap_column, response.results.columns)
+            new_data = zip(*columns)
+            self._data += new_data
         # response.hasMoreRows seems to always be False, so we instead check the number of rows
         # https://github.com/apache/hive/blob/release-1.2.1/service/src/java/org/apache/hive/service/cli/thrift/ThriftCLIService.java#L678
         # if not response.hasMoreRows:
-        if not new_data:
-            self._state = self._STATE_FINISHED
+            if not new_data:
+                self._state = self._STATE_FINISHED
 
     def poll(self):
         """Poll for and return the raw status data provided by the Hive Thrift REST API.
