@@ -252,7 +252,10 @@ class Cursor(common.DBAPICursor):
         assert(self._state == self._STATE_RUNNING), "Should be running when in _fetch_more"
         assert(self._operationHandle is not None), "Should have an op handle in _fetch_more"
         if not self._operationHandle.hasResultSet:
-            raise ProgrammingError("No result set")
+            self._data = []
+            self._state = self._STATE_FINISHED
+            #raise ProgrammingError("No result set")
+
         req = ttypes.TFetchResultsReq(
             operationHandle=self._operationHandle,
             orientation=ttypes.TFetchOrientation.FETCH_NEXT,
