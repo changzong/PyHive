@@ -107,7 +107,16 @@ class DBAPICursor(with_metaclass(abc.ABCMeta, object)):
             return None
         else:
             self._rownumber += 1
-            return self._data.popleft()
+            return self.unicode_to_string(self._data.popleft())
+
+    def unicode_to_string(self, tuple_item):
+        res_tuple = tuple()
+        for item in tuple_item:
+            if isinstance(item, unicode):
+                res_tuple += (item.encode('utf8'),)
+            else:
+                res_tuple += (item,)
+        return res_tuple
 
     def fetchmany(self, size=None):
         """Fetch the next set of rows of a query result, returning a sequence of sequences (e.g. a
